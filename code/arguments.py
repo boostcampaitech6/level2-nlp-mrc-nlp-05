@@ -38,6 +38,10 @@ class DataTrainingArguments:
         default="../data/train_dataset",
         metadata={"help": "The name of the dataset to use."},
     )
+    valid_dataset_name: Optional[str] = field(
+        default="../data/train_dataset",
+        metadata={"help": "The name of the validation dataset to use."}
+    )
     overwrite_cache: bool = field(
         default=False,
         metadata={"help": "Overwrite the cached training and evaluation sets"},
@@ -89,6 +93,12 @@ class DataTrainingArguments:
     )
     use_faiss: bool = field(
         default=False, metadata={"help": "Whether to build with faiss"}
+    )
+    retrieval_class: str = field(
+        default="tfidf",
+        metadata={
+            "help": "Define which retriever class to use."
+        }
     )
 
 
