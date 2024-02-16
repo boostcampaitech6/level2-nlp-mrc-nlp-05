@@ -13,6 +13,7 @@ from transformers import (
 )
 from utils_qa import check_no_error, postprocess_qa_predictions, set_seed
 from mrc import run_mrc
+from customed_tokenizer import CustomedTokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -64,10 +65,13 @@ def main():
         config=config,
     )
 
+    # 사용할 tokenizer 이름 쓰기 "okt", "mecab", "komoran", "hannanum", "kkma"
+    customed_tokenizer = CustomedTokenizer('kkma')
+
     # True일 경우 : run passage retrieval
     if data_args.eval_retrieval:
         datasets = run_sparse_retrieval(
-            tokenizer.tokenize, datasets, training_args, data_args,
+            customed_tokenizer.tokenize, datasets, training_args, data_args,
         )
 
     # eval or predict mrc model

@@ -7,11 +7,14 @@ python train.py \
 --eval_steps 500 \
 --logging_steps 500 \
 --evaluation_strategy "steps" \
-# --per_device_train_batch_size 8 \
-# --per_device_eval_batch_size 8 \
-# --num_train_epochs 3 \
-# --weight_decay 0.01 \
-# --warmup_ratio 0.1 \
-# --learning_rate 3e-5 \
+--per_device_train_batch_size 8 \
+--per_device_eval_batch_size 8 \
+--num_train_epochs 3 \
+--weight_decay 0.01 \
+--warmup_ratio 0.1 \
+--learning_rate 5e-5 \
+--fp16 true \
+--fp16_backend "auto" \
+--fp16_opt_level '01' \
 # --load_best_model_at_end True \ 
 # --metric_for_best_model "exact_match"
