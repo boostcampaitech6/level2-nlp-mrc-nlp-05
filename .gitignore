@@ -6,3 +6,7 @@ code/wandb/*
 code/README.md
 data/*
 home/*
+.cache/*
+.config/wandb/*
+.netrc
+.bash_history
