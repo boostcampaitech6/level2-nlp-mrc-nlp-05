@@ -2,7 +2,7 @@ import os
 from typing import NoReturn
 
 from arguments import DataTrainingArguments, ModelArguments
-from datasets import DatasetDict, load_metric
+from datasets import DatasetDict, load_metric, load_from_disk
 from trainer_qa import QuestionAnsweringTrainer
 from transformers import (
     DataCollatorWithPadding,
@@ -10,6 +10,7 @@ from transformers import (
     TrainingArguments
 )
 from utils_qa import check_no_error, postprocess_qa_predictions
+import pandas as pd
 
 def run_mrc(
     data_args: DataTrainingArguments,
@@ -287,3 +288,18 @@ def run_mrc(
 
         trainer.log_metrics("eval", metrics)
         trainer.save_metrics("eval", metrics)
+
+        if not training_args.do_train:
+            original_valid_path = "/data/ephemeral/data/train_dataset"
+            df_valid = pd.DataFrame(load_from_disk(original_valid_path)['validation'])
+            retriever_path = "/data/ephemeral/code/outputs/valid_dataset/valid_retrieval.csv"
+            df_retriever = pd.read_csv(retriever_path, index_col=0)
+            # reader_path = "/opt/ml/level2_nlp_mrc-nlp-12/code/outputs/valid_dataset/predictions.json"
+            # df_reader = pd.DataFrame(pd.read_json(reader_path, typ='series')).reset_index().rename(columns={'index':'id', 0:'answers'})
+            df_retriever = df_retriever.rename(columns={'answers':'original_answers'})
+            df_retriever['answers'] = df_valid['answers']
+            df_retriever['original_answers'] = [answers['text'][0] for answers in df_retriever['answers']]
+            # df_retriever = df_retriever.drop(columns = "answers")
+            # df_retriever = pd.merge(df_retriever, df_reader, on='id')
+            df = df_retriever[["id", "question", "original_context", "context", "original_answers", "answers"]]
+            df.to_csv("/data/ephemeral/code/outputs/valid_dataset/valid_inference.csv", index=False)

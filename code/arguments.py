@@ -100,6 +100,12 @@ class DataTrainingArguments:
             "help": "Define which retriever class to use."
         }
     )
+    bm25_type: str = field(
+        default="basic",
+        metadata={
+            "help": "Choose BM25 type to use."
+        }
+    )
 
 
 @dataclass

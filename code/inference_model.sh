@@ -4,4 +4,5 @@ python inference.py \
 --valid_dataset_name "../data/train_dataset/" \
 --model_name_or_path "./models/train_dataset/" \
 --retrieval_class "bm25" \
---do_eval
+--bm25_type "bm25L" \
+--do_predict

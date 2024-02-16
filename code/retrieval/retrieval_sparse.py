@@ -22,7 +22,7 @@ from datasets import (
 from transformers import TrainingArguments
 from sklearn.feature_extraction.text import TfidfVectorizer
 from tqdm.auto import tqdm
-from rank_bm25 import BM25Okapi
+from rank_bm25 import BM25Okapi, BM25L, BM25Plus
 
 seed = 2024
 random.seed(seed) # python random seed 고정
@@ -398,6 +398,7 @@ class BM25Retrieval:
     def __init__(
         self,
         tokenize_fn,
+        data_args: DataTrainingArguments,
         data_path: Optional[str] = "../data/",
         context_path: Optional[str] = "wikipedia_documents.json"
     ) -> NoReturn:
@@ -436,7 +437,12 @@ class BM25Retrieval:
         # tokenizing & using BM25Okapi
         self.tokenize_fn = tokenize_fn
         self.tokenized_corpus = [self.tokenize_fn(doc) for doc in self.contexts]
-        self.bm25 = BM25Okapi(self.tokenized_corpus)
+        if data_args.bm25_type == "basic":
+            self.bm25 = BM25Okapi(self.tokenized_corpus)
+        elif data_args.bm25_type == "bm25+":
+            self.bm25 = BM25Plus(self.tokenized_corpus)
+        elif data_args.bm25_type == "bm25L":
+            self.bm25 = BM25L(self.tokenized_corpus)
 
     def retrieve(
         self, query_or_dataset: Union[str, Dataset], topk: Optional[int] = 1
@@ -575,7 +581,7 @@ def run_sparse_retrieval(
         retriever.get_sparse_embedding()
     elif data_args.retrieval_class == "bm25":
         retriever = BM25Retrieval(
-            tokenize_fn=tokenize_fn, data_path=data_path, context_path=context_path
+            tokenize_fn=tokenize_fn, data_args=data_args, data_path=data_path, context_path=context_path
         )
 
     if data_args.use_faiss:
