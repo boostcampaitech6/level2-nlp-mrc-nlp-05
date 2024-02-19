@@ -7,6 +7,7 @@ python train.py \
 --eval_steps 500 \
 --logging_steps 500 \
 --evaluation_strategy "steps" \
+--fp16 true \
 # --per_device_train_batch_size 8 \
 # --per_device_eval_batch_size 8 \
 # --num_train_epochs 3 \
@@ -15,4 +16,3 @@ python train.py \
 # --learning_rate 3e-5 \
 # --load_best_model_at_end True \ 
 # --metric_for_best_model "exact_match"
---fp16 true \
