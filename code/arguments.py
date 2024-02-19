@@ -53,6 +53,12 @@ class DataTrainingArguments:
             "than this will be truncated, sequences shorter will be padded."
         },
     )
+    max_target_length: int = field(
+        default=128,
+        metadata={
+            "help": "The maximum total target length"
+        }
+    )
     pad_to_max_length: bool = field(
         default=False,
         metadata={

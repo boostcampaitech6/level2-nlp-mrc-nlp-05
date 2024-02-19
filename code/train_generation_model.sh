@@ -1,12 +1,14 @@
-python train.py \
---output_dir ./models/train_dataset \
+python train_generation.py \
+--output_dir ./generation_models/train_dataset \
 --do_train \
 --do_eval \
 --overwrite_output_dir True \
---model_name_or_path "klue/bert-base" \
+--model_name_or_path "paust/pko-t5-base" \
 --eval_steps 500 \
 --logging_steps 500 \
 --evaluation_strategy "steps" \
+--fp16 True \
+--predict_with_generate True \
 # --per_device_train_batch_size 8 \
 # --per_device_eval_batch_size 8 \
 # --num_train_epochs 3 \
