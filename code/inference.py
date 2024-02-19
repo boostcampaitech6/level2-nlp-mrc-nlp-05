@@ -3,7 +3,7 @@ import sys
 
 from arguments import DataTrainingArguments, ModelArguments
 from datasets import load_from_disk
-from retrieval.retrieval_sparse import run_sparse_retrieval
+from retrieval import run_sparse_retrieval
 from transformers import (
     AutoConfig,
     AutoModelForQuestionAnswering,
