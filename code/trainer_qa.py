@@ -64,6 +64,9 @@ class QuestionAnsweringTrainer(Trainer):
                 eval_examples, eval_dataset, output.predictions, self.args
             )
             metrics = self.compute_metrics(eval_preds)
+            for key in list(metrics.keys()):
+                if not key.startswith("eval_"):
+                    metrics[f"eval_{key}"] = metrics.pop(key)
 
             self.log(metrics)
         else:

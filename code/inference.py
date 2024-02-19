@@ -43,12 +43,7 @@ def main():
     set_seed(training_args.seed)
 
     datasets = load_from_disk(data_args.dataset_name)
-    print("Test datasets Info")
     print(datasets)
-
-    valid_datasets = DatasetDict({'validation': load_from_disk(data_args.valid_dataset_name)['validation']})
-    print("Validation datasets Info")
-    print(valid_datasets)
 
     # AutoConfig를 이용하여 pretrained model 과 tokenizer를 불러옵니다.
     # argument로 원하는 모델 이름을 설정하면 옵션을 바꿀 수 있습니다.
@@ -69,19 +64,15 @@ def main():
         config=config,
     )
 
-    # predict mrc model
-    if training_args.do_predict:
-        test_datasets = run_sparse_retrieval(
-            tokenizer.tokenize, datasets, training_args, data_args
+    # True일 경우 : run passage retrieval
+    if data_args.eval_retrieval:
+        datasets = run_sparse_retrieval(
+            tokenizer.tokenize, datasets, training_args, data_args,
         )
-        run_mrc(data_args, training_args, model_args, test_datasets, tokenizer, model, logger)
 
-    # eval mrc model
-    if training_args.do_eval:
-        valid_datasets = run_sparse_retrieval(
-            tokenizer.tokenize, valid_datasets, training_args, data_args
-        )
-        run_mrc(data_args, training_args, model_args, valid_datasets, tokenizer, model, logger)
+    # eval or predict mrc model
+    if training_args.do_eval or training_args.do_predict:
+        run_mrc(data_args, training_args, model_args, datasets, tokenizer, model, logger)
 
 
 if __name__ == "__main__":
