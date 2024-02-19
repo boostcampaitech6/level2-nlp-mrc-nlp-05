@@ -7,7 +7,7 @@ python train.py \
 --eval_steps 500 \
 --logging_steps 500 \
 --evaluation_strategy "steps" \
---fp16 true \
+# --fp16 true \
 # --per_device_train_batch_size 8 \
 # --per_device_eval_batch_size 8 \
 # --num_train_epochs 3 \
