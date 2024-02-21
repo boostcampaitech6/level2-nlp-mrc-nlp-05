@@ -3,7 +3,7 @@ import sys
 from typing import NoReturn
 import wandb
 
-from arguments import DataTrainingArguments, ModelArguments, WandbArguments
+from arguments import DataTrainingArguments, ModelArguments
 from datasets import load_from_disk
 from transformers import (
     AutoConfig,
@@ -22,12 +22,12 @@ def main():
     # --help flag 를 실행시켜서 확인할 수 도 있습니다.
 
     parser = HfArgumentParser(
-        (ModelArguments, DataTrainingArguments, TrainingArguments, WandbArguments)
+        (ModelArguments, DataTrainingArguments, TrainingArguments)
     )
-    model_args, data_args, training_args, wandb_args = parser.parse_args_into_dataclasses()
+    model_args, data_args, training_args = parser.parse_args_into_dataclasses()
     print(model_args.model_name_or_path)
 
-    wandb.init(project=wandb_args.project_name, entity=wandb_args.entity_name)
+    wandb.init(project="MRC_Project", entity="level2-klue-nlp-05")
     training_args.report_to=["wandb"]
 
     # [참고] argument를 manual하게 수정하고 싶은 경우에 아래와 같은 방식을 사용할 수 있습니다

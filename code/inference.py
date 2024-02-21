@@ -3,7 +3,7 @@ import sys
 
 from arguments import DataTrainingArguments, ModelArguments
 from datasets import load_from_disk
-from retrieval import run_sparse_retrieval
+from retrieval import run_sparse_retrieval, run_dense_retrieval
 from transformers import (
     AutoConfig,
     AutoModelForQuestionAnswering,
@@ -66,8 +66,12 @@ def main():
 
     # True일 경우 : run passage retrieval
     if data_args.eval_retrieval:
-        datasets = run_sparse_retrieval(
-            tokenizer.tokenize, datasets, training_args, data_args,
+        # datasets = run_sparse_retrieval(
+        #     tokenizer.tokenize, datasets, training_args, data_args,
+        # )
+
+        datasets = run_dense_retrieval(
+            datasets, training_args, data_args,
         )
 
     # eval or predict mrc model

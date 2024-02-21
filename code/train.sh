@@ -1,18 +1,16 @@
 python train.py \
---output_dir ./models/train_dataset \
---do_train \
---do_eval \
---overwrite_output_dir True \
---model_name_or_path "klue/bert-base" \
---eval_steps 500 \
---logging_steps 500 \
---evaluation_strategy "steps" \
-# --fp16 true \
-# --per_device_train_batch_size 8 \
-# --per_device_eval_batch_size 8 \
-# --num_train_epochs 3 \
-# --weight_decay 0.01 \
-# --warmup_ratio 0.1 \
-# --learning_rate 3e-5 \
-# --load_best_model_at_end True \ 
-# --metric_for_best_model "exact_match"
+    --output_dir ./models/train_dataset \
+    --do_train \
+    --do_eval \
+    --model_name_or_path "klue/roberta-large" \
+    --overwrite_output_dir True \
+    --per_device_train_batch_size 32 \
+    --per_device_eval_batch_size 32 \
+    --learning_rate 1e-5 \
+    --num_train_epochs 3 \
+    --weight_decay 0.01 \
+    --warmup_ratio 0.1 \
+    --logging_steps 100 \
+    --eval_steps 100 \
+    --evaluation_strategy "steps" \
+    --fp16 True \
