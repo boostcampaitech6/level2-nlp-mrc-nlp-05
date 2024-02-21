@@ -468,44 +468,44 @@ class DenseRetrieval:
 
         # 1. In-Batch-Negative 만들기
         # CORPUS를 np.array로 변환해줍니다.
-        # corpus = self.contexts
-        # p_with_neg = []
-
-        # for p, q, a in zip(train_dataset['context'], train_dataset['question'], train_dataset['answers']):
-        #     p_with_neg.append(p)
-
-        #     q_vec = self.tfidfv.transform([q])
-        #     result = q_vec * self.p_embedding.T
-        #     result = result.toarray()
-        #     sorted_result = np.argsort(result.squeeze())[::-1]
-        #     doc_indices = sorted_result.tolist()
-
-        #     cnt = 0
-        #     for idx in doc_indices:
-        #         if not a['text'][0] in corpus[idx]:
-        #             p_with_neg.append(corpus[idx])
-        #             cnt += 1
-        #         else:
-        #             continue
-
-        #         if cnt == num_neg:
-        #             break
-
-        corpus = np.array(self.contexts)
+        corpus = self.contexts
         p_with_neg = []
 
-        for c in train_dataset['context']:
+        for p, q, a in zip(train_dataset['context'], train_dataset['question'], train_dataset['answers']):
+            p_with_neg.append(p)
 
-            while True:
-                neg_idxs = np.random.randint(len(corpus), size=num_neg)
+            q_vec = self.tfidfv.transform([q])
+            result = q_vec * self.p_embedding.T
+            result = result.toarray()
+            sorted_result = np.argsort(result.squeeze())[::-1]
+            doc_indices = sorted_result.tolist()
 
-                if not c in corpus[neg_idxs]:
-                    p_neg = corpus[neg_idxs]
+            cnt = 0
+            for idx in doc_indices:
+                if not a['text'][0] in corpus[idx]:
+                    p_with_neg.append(corpus[idx])
+                    cnt += 1
+                else:
+                    continue
 
-                    p_with_neg.append(c)
-                    p_with_neg.extend(p_neg)
-                    # print(p_with_neg)
+                if cnt == num_neg:
                     break
+
+        # corpus = np.array(self.contexts)
+        # p_with_neg = []
+
+        # for c in train_dataset['context']:
+
+        #     while True:
+        #         neg_idxs = np.random.randint(len(corpus), size=num_neg)
+
+        #         if not c in corpus[neg_idxs]:
+        #             p_neg = corpus[neg_idxs]
+
+        #             p_with_neg.append(c)
+        #             p_with_neg.extend(p_neg)
+        #             # print(p_with_neg)
+        #             break
 
         # 2. (Question, Passage) 데이터셋 만들어주기
         q_seqs = tokenizer(train_dataset['question'], padding="max_length", truncation=True, return_tensors='pt')
@@ -523,7 +523,7 @@ class DenseRetrieval:
 
         self.train_dataloader = DataLoader(dataset, shuffle=True, batch_size=self.args.per_device_train_batch_size)
 
-        valid_seqs = tokenizer(corpus.tolist(), padding="max_length", truncation=True, return_tensors='pt')
+        valid_seqs = tokenizer(corpus, padding="max_length", truncation=True, return_tensors='pt')
         passage_dataset = TensorDataset(
             valid_seqs['input_ids'], valid_seqs['attention_mask'], valid_seqs['token_type_ids']
         )
