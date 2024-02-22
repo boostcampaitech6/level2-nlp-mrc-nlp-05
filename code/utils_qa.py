@@ -30,6 +30,8 @@ from datasets import DatasetDict
 from tqdm.auto import tqdm
 from transformers import PreTrainedTokenizerFast, TrainingArguments, is_torch_available
 from transformers.trainer_utils import get_last_checkpoint
+from data_preprocessing import remove_special_char
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +96,29 @@ def postprocess_qa_predictions(
         is_world_process_zero (:obj:`bool`, `optional`, defaults to :obj:`True`):
             이 프로세스가 main process인지 여부(logging/save를 수행해야 하는지 여부를 결정하는 데 사용됨)
     """
+    def sum_probability(predictions):
+        predictions_df = pd.DataFrame(predictions)
+        sum_df = {}
+        
+        for col in range(len(predictions_df.columns)):
+            sum_dict = {}
+            sum_df[predictions_df.columns[col]] = None
+            
+            for row in range(0, n_best_size): 
+                logit_dict = predictions_df.iloc[:, col][row]
+                start_logit = logit_dict['start_logit']
+                end_logit = logit_dict['end_logit']
+                text = logit_dict['text']
+                probability = logit_dict['probability']
+            
+                try:
+                    sum_dict[text] += probability
+                except KeyError:
+                    sum_dict[text] = probability
+            
+            sum_df[predictions_df.columns[col]] = sorted(sum_dict.items(), reverse=True, key=lambda item: item[1])[0][0]
+        return sum_df
+
     assert (
         len(predictions) == 2
     ), "`predictions` should be a tuple with two elements (start_logits, end_logits)."
@@ -257,6 +282,10 @@ def postprocess_qa_predictions(
             else:
                 all_predictions[example["id"]] = best_non_null_pred["text"]
 
+        # prediction text에 대해 postprocessing. 
+        for key, value in all_predictions.items():
+            all_predictions[key] = remove_special_char(all_predictions[key])
+
         # np.float를 다시 float로 casting -> `predictions`은 JSON-serializable 가능
         all_nbest_json[example["id"]] = [
             {
@@ -284,6 +313,11 @@ def postprocess_qa_predictions(
             if prefix is None
             else f"nbest_predictions_{prefix}".json,
         )
+        sum_file = os.path.join(
+            output_dir,
+            "sum_of_predictions.json"
+            if prefix is None else f"sum_of_predictions_{prefix}".json
+        )
         if version_2_with_negative:
             null_odds_file = os.path.join(
                 output_dir,
@@ -299,6 +333,11 @@ def postprocess_qa_predictions(
         with open(nbest_file, "w", encoding="utf-8") as writer:
             writer.write(
                 json.dumps(all_nbest_json, indent=4, ensure_ascii=False) + "\n"
+            )
+        logger.info(f"Saving sum_of_preds to {sum_file}.")
+        with open(sum_file, "w", encoding="utf-8") as writer:
+            writer.write(
+                json.dumps(sum_probability(all_nbest_json), indent=4, ensure_ascii=False) + "\n"
             )
         if version_2_with_negative:
             logger.info(f"Saving null_odds to {null_odds_file}.")

@@ -23,6 +23,7 @@ from transformers import TrainingArguments
 from sklearn.feature_extraction.text import TfidfVectorizer
 from tqdm.auto import tqdm
 from rank_bm25 import BM25Okapi, BM25L, BM25Plus
+from data_preprocessing import *
 
 seed = 2024
 random.seed(seed) # python random seed 고정
@@ -428,11 +429,17 @@ class BM25Retrieval:
         with open(os.path.join(data_path, context_path), "r", encoding="utf-8") as f:
             wiki = json.load(f)
 
+        # wiki data preprocessing
+        # wiki = remove_duplicated_wiki(wiki)         # 중복 데이터 제거
+        # wiki = remove_wiki_less_than_percents(wiki, 30) # 한국어 비율 50%이하 데이터 제거
+        # wiki = remove_special_char_wiki(wiki)   # 특수문자 제거
+
         self.contexts = list(
             dict.fromkeys([v["text"] for v in wiki.values()])
         )
         print(f"Lengths of unique contexts : {len(self.contexts)}")
-        self.ids = list(range(len(self.contexts)))
+        
+        self.contexts = normalize_wiki(self.contexts)  # wiki text 반각 문자 변환
 
         # tokenizing & using BM25Okapi
         self.tokenize_fn = tokenize_fn

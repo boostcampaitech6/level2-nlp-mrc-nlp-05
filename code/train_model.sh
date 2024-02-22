@@ -7,12 +7,7 @@ python train.py \
 --eval_steps 500 \
 --logging_steps 500 \
 --evaluation_strategy "steps" \
---per_device_train_batch_size 8 \
---per_device_eval_batch_size 8 \
+--per_device_train_batch_size 16 \
+--per_device_eval_batch_size 16 \
 --num_train_epochs 3 \
-# --fp16 True \
-# --load_best_model_at_end True \
-# --metric_for_best_model "exact_match"
-# --weight_decay 0.01 \
-# --warmup_ratio 0.1 \
-# --learning_rate 3e-5 \
+--learning_rate 1e-5

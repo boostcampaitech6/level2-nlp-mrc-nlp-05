@@ -5,4 +5,5 @@ python inference.py \
 --model_name_or_path "./models/train_dataset/" \
 --retrieval_class "bm25" \
 --bm25_type "bm25+" \
+--top_k_retrieval 30 \
 --do_predict

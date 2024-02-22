@@ -11,6 +11,7 @@ from transformers import (
 )
 from utils_qa import check_no_error, postprocess_qa_predictions
 import pandas as pd
+from data_preprocessing import *
 
 def run_mrc(
     data_args: DataTrainingArguments,
@@ -54,7 +55,7 @@ def run_mrc(
             stride=data_args.doc_stride,
             return_overflowing_tokens=True,
             return_offsets_mapping=True,
-            return_token_type_ids=True, # roberta모델을 사용할 경우 False, bert를 사용할 경우 True로 표기해야합니다.
+            return_token_type_ids=False, # roberta모델을 사용할 경우 False, bert를 사용할 경우 True로 표기해야합니다.
             padding="max_length" if data_args.pad_to_max_length else False,
         )
 
@@ -125,6 +126,13 @@ def run_mrc(
             raise ValueError("--do_train requires a train dataset")
         train_dataset = datasets["train"]
 
+        # train data preprocessing - 특수문자 제거
+        # train_dataset = remove_special_char_dataset(train_dataset)
+        # train data preprocessing - 반각 문자 변환
+        train_dataset = normalize_data_context(train_dataset)
+        train_dataset = normalize_data_question(train_dataset)
+        train_dataset = normalize_data_answer(train_dataset)
+
         # dataset에서 train feature를 생성합니다.
         train_dataset = train_dataset.map(
             prepare_train_features,
@@ -146,7 +154,7 @@ def run_mrc(
             stride=data_args.doc_stride,
             return_overflowing_tokens=True,
             return_offsets_mapping=True,
-            return_token_type_ids=True, # roberta모델을 사용할 경우 False, bert를 사용할 경우 True로 표기해야합니다.
+            return_token_type_ids=False, # roberta모델을 사용할 경우 False, bert를 사용할 경우 True로 표기해야합니다.
             padding="max_length" if data_args.pad_to_max_length else False,
         )
 
@@ -175,6 +183,14 @@ def run_mrc(
 
     if training_args.do_eval or training_args.do_predict:
         eval_dataset = datasets["validation"]
+
+        # valid data preprocessing - 특수문자 제거
+        # eval_dataset = remove_special_char_dataset(eval_dataset)
+        # valid data preprocessing - 반각 문자 변환
+        eval_dataset = normalize_data_question(eval_dataset)
+        if training_args.do_eval:   # test dataset에는 context, answer가 존재하지 않음
+            eval_dataset = normalize_data_context(eval_dataset)
+            eval_dataset = normalize_data_answer(eval_dataset)
 
         # Validation Feature 생성
         eval_dataset = eval_dataset.map(
